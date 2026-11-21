@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: gocomet-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gocomet_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in root .env}
+      POSTGRES_DB: gocomet_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - gocomet_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gocomet_user -d gocomet_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: gocomet-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - gocomet_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  gocomet_postgres_data:
+  gocomet_redis_data:
+
